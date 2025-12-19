@@ -1,84 +1,105 @@
-## 🏋️ Gym Customer Churn Prediction
+# 🏋️ Gym Customer Churn Prediction
 
-## 🌟 Project Overview
+This project aims to predict **customer churn (membership cancellation)** for a gym chain using machine learning techniques.  
+The goal is to identify high-risk members early and support **data-driven retention strategies**.
 
-This project focuses on predicting **customer churn (attrition)** for a gym chain using historical membership, usage, and spending data.  
-A **Random Forest Classifier** is trained to identify members with a high risk of churn and to uncover the most influential factors behind customer attrition.
+---
+
+## 🚀 Project Overview
+
+- **Problem Type:** Binary Classification (Churn / No Churn)
+- **Dataset Size:** 4,000 customers
+- **Target Variable:** `Churn`  
+  - `1` → Customer churned  
+  - `0` → Customer retained
+- **Churn Rate:** ~26.5%
 
 ---
 
 ## 📊 Dataset Information
 
-- **File:** `gym_churn_us.csv`
-- **Total Records:** 4,000
-- **Target Variable:** `Churn`
-  - `1` → Churned
-  - `0` → Retained
-- **Churn Rate:** ~26.5%
+**File:** `gym_churn_us.csv`
+
+### Features:
+- Demographic data (Age, Gender)
+- Contract information (Contract period, Remaining months)
+- Usage behavior (Class frequency, Group visits)
+- Engagement indicators (Lifetime, Additional charges)
+
+All features are **numerical**, and the dataset contains **no missing values**.
 
 ---
 
 ## 🛠️ Methodology
 
-1. **Data Loading & Cleaning**
-   - Dataset loaded using Pandas
-   - No missing values detected
-
-2. **Exploratory Data Analysis (EDA)**
-   - Descriptive statistics
-   - Correlation analysis
-   - Heatmap visualization for feature relationships
-
-3. **Model Training**
-   - Algorithm: **Random Forest Classifier**
-   - Train-test split: **80% / 20%**
-   - Default hyperparameters applied
+### 1️⃣ Exploratory Data Analysis (EDA)
+- Descriptive statistics
+- Churn distribution analysis
+- **Correlation heatmap** to explore feature relationships
 
 ---
 
-## 🚀 Model Performance
+### 2️⃣ Model Training
 
-The model demonstrates strong performance on the test dataset.
+#### ✅ Random Forest Classifier
+- Baseline ensemble model
+- Strong overall performance
+- Feature importance extracted
 
-| Metric | Score |
-|------|------|
-| **Accuracy** | **0.92** |
-| **Precision (Churn = 1)** | 0.87 |
-| **Recall (Churn = 1)** | 0.80 |
-| **F1-Score (Churn = 1)** | 0.83 |
-
----
-
-## 🔍 Confusion Matrix
-
-| | Predicted: No Churn (0) | Predicted: Churn (1) |
-|---|---|---|
-| **Actual: No Churn (0)** | 573 | 25 |
-| **Actual: Churn (1)** | 40 | 162 |
+#### ✅ XGBoost Classifier
+- Gradient boosting model
+- Handles class imbalance effectively
+- Achieved superior performance compared to Random Forest
 
 ---
 
-## 🔑 Key Insights (Feature Importance)
+### 3️⃣ Threshold Optimization (Critical for Churn Problems)
 
-The most important features influencing churn prediction are:
-
-1. **Lifetime**  
-   - Long-term members are significantly more stable.
-
-2. **Avg_class_frequency_current_month**  
-   - A decrease in recent attendance is a strong churn signal.
-
-3. **Age**  
-   - Age plays a meaningful role in customer retention behavior.
-
-4. **Avg_class_frequency_total** and **Avg_additional_charges_total**  
-   - Higher engagement and extra spending indicate stronger loyalty.
+Instead of using the default `0.5` threshold:
+- Optimized decision threshold to **maximize recall**
+- Goal: catch as many churn customers as possible
+- Final threshold used: **0.35**
 
 ---
 
-## 💻 Installation & Usage
+### 4️⃣ Model Explainability (SHAP)
+- SHAP values used for **global and local interpretability**
+- Identified key churn drivers:
+  - Membership lifetime
+  - Recent attendance frequency
+  - Contract duration
+  - Age
 
-### Requirements
+---
 
+## 📈 Model Performance Comparison
+
+| Model | Recall (Churn=1) | Precision (Churn=1) | F1-score | ROC-AUC |
+|------|------------------|---------------------|----------|---------|
+| Random Forest | 0.80 | 0.87 | 0.83 | 0.96 |
+| XGBoost (Default) | 0.86 | 0.86 | 0.86 | 0.97 |
+| **XGBoost (Threshold Optimized)** | **0.90** | 0.84 | **0.87** | **0.97** |
+
+📌 **Threshold-optimized XGBoost** was selected as the final model.
+
+---
+
+## 🧠 Key Insights
+
+- Long-term members are significantly less likely to churn
+- A sudden drop in recent gym attendance is the strongest churn signal
+- Short contract duration strongly correlates with churn risk
+- Threshold optimization dramatically improves business impact
+
+---
+
+## 💻 Deployment (Streamlit App)
+
+The final model is deployed using **Streamlit**, allowing:
+- Manual customer input
+- Real-time churn probability prediction
+- Risk classification using optimized threshold
+
+### Run the app:
 ```bash
-pip install pandas numpy scikit-learn matplotlib seaborn
+streamlit run app.py
