@@ -109,21 +109,29 @@ with col2:
 # -------------------------------------------------
 # SHAP Explanation (XGBoost only)
 # -------------------------------------------------
-if model_choice == "XGBoost":
+show_shap = st.checkbox("🔍 Show explanation (SHAP)")
+
+if show_shap and model_choice == "XGBoost":
     st.subheader("🔍 SHAP Explanation")
 
     explainer = shap.TreeExplainer(xgb_model)
     shap_values = explainer.shap_values(input_df)
 
-    shap.initjs()
+    # Binary classification güvenliği
+    if isinstance(shap_values, list):
+        shap_values = shap_values[1]
+
+    expected_value = explainer.expected_value
+    if isinstance(expected_value, list):
+        expected_value = expected_value[1]
 
     shap_html = shap.force_plot(
-        explainer.expected_value,
+        expected_value,
         shap_values[0],
-        input_df
+        input_df.iloc[0]
     ).html()
 
-    st.components.v1.html(shap_html, height=300)
+    st.components.v1.html(shap_html, height=350)
 
 # -------------------------------------------------
 # Footer
