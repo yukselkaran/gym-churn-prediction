@@ -89,6 +89,39 @@ else:
     proba = xgb_model.predict_proba(input_df)[0][1]
 
 prediction = int(proba >= threshold)
+# -------------------------------------------------
+# Text-based Explanation (Rule-based)
+# -------------------------------------------------
+reasons_positive = []  # churn riskini artıranlar
+reasons_negative = []  # churn riskini azaltanlar
+
+if input_df.loc[0, "Contract_period"] <= 3:
+    reasons_positive.append("short contract period")
+
+if input_df.loc[0, "Month_to_end_contract"] <= 1:
+    reasons_positive.append("contract is about to end")
+
+if input_df.loc[0, "Avg_class_frequency_current_month"] < 1:
+    reasons_positive.append("low recent class attendance")
+
+if input_df.loc[0, "Lifetime"] < 6:
+    reasons_positive.append("short customer lifetime")
+
+if input_df.loc[0, "Age"] < 30:
+    reasons_positive.append("young age segment")
+
+# Protective factors
+if input_df.loc[0, "Contract_period"] >= 6:
+    reasons_negative.append("long-term contract")
+
+if input_df.loc[0, "Avg_class_frequency_current_month"] >= 3:
+    reasons_negative.append("high class attendance")
+
+if input_df.loc[0, "Partner"] == 1:
+    reasons_negative.append("has a partner membership")
+
+if input_df.loc[0, "Promo_friends"] == 1:
+    reasons_negative.append("joined via friend promotion")
 
 # -------------------------------------------------
 # Results
@@ -97,14 +130,23 @@ st.subheader("📊 Prediction Result")
 
 col1, col2 = st.columns(2)
 
-with col1:
-    st.metric("Churn Probability", f"{proba:.2%}")
-
 with col2:
     if prediction == 1:
         st.error("🚨 Customer WILL CHURN")
+
+        if reasons_positive:
+            st.markdown(
+                "**Main reasons:** " +
+                ", ".join(reasons_positive[:3])
+            )
     else:
         st.success("✅ Customer WILL STAY")
+
+        if reasons_negative:
+            st.markdown(
+                "**Decision based on:** " +
+                ", ".join(reasons_negative[:3])
+            )
 
 # -------------------------------------------------
 # SHAP Explanation (XGBoost only)
