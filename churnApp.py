@@ -130,6 +130,9 @@ st.subheader("📊 Prediction Result")
 
 col1, col2 = st.columns(2)
 
+with col1:
+    st.metric("Churn Probability", f"{proba:.2%}")
+
 with col2:
     if prediction == 1:
         st.error("🚨 Customer WILL CHURN")
