@@ -81,6 +81,32 @@ if model_choice == "XGBoost":
     )
 
 # -------------------------------------------------
+# Reference values (business-defined thresholds)
+# -------------------------------------------------
+ideal_values = {
+    "Avg_class_frequency_current_month": 3,
+    "Avg_class_frequency_total": 3,
+    "Lifetime": 12,
+    "Contract_period": 6
+}
+
+# -------------------------------------------------
+# Identify weak features
+# -------------------------------------------------
+weak_features = []
+
+for feature, ideal in ideal_values.items():
+    actual = input_df.loc[0, feature]
+    if actual < ideal:
+        weak_features.append({
+            "Feature": feature,
+            "Current Value": actual,
+            "Recommended Value": ideal
+        })
+
+weak_df = pd.DataFrame(weak_features)
+
+# -------------------------------------------------
 # Prediction
 # -------------------------------------------------
 if model_choice == "Random Forest":
@@ -149,6 +175,36 @@ with col2:
             st.markdown(
                 "**Decision based on:** " +
                 ", ".join(reasons_negative[:3])
+            )
+# -------------------------------------------------
+# Retention Suggestions
+# -------------------------------------------------
+if prediction == 1 and not weak_df.empty:
+    st.subheader("📉 Retention Improvement Analysis")
+
+    st.markdown(
+        "The following features are **below recommended levels**. "
+        "Improving them may reduce churn risk."
+    )
+
+    st.bar_chart(
+        weak_df.set_index("Feature")[["Current Value", "Recommended Value"]]
+    )
+
+    st.markdown("### 🔧 Suggested Actions")
+
+    for _, row in weak_df.iterrows():
+        if row["Feature"] == "Avg_class_frequency_current_month":
+            st.markdown(
+                "- 📅 Encourage more class attendance (free classes, reminders, PT offers)"
+            )
+        elif row["Feature"] == "Lifetime":
+            st.markdown(
+                "- 🎁 Loyalty campaigns to increase customer lifetime"
+            )
+        elif row["Feature"] == "Contract_period":
+            st.markdown(
+                "- 📄 Offer discounted long-term contracts"
             )
 
 # -------------------------------------------------
